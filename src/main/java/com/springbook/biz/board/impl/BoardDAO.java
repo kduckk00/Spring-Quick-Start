@@ -24,6 +24,9 @@ public class BoardDAO{
 	private final String BOARD_DELETE = "DELETE BOARD WHERE SEQ=?";
 	private final String BOARD_GET = "SELECT * FROM BOARD WHERE SEQ=?";
 	private final String BOARD_LIST = "SELECT * FROM BOARD ORDER BY SEQ DESC"; // 최신 글부터 조회
+	private final String BOARD_LIST_T = "SELECT * FROM BOARD WHERE TITLE LIKE '%' || ? || '%' ORDER BY SEQ DESC";
+	private final String BOARD_LIST_C = "SELECT * FROM BOARD WHERE CONTENT LIKE '%' || ? || '%' ORDER BY SEQ DESC";
+	
 	// CRUD 기능의 메소드 구현
 	// 글 등록
 	public void insertBoard(BoardVO vo) {
@@ -106,7 +109,12 @@ public class BoardDAO{
 		List<BoardVO> boardList = new ArrayList<BoardVO>(); // 글 목록을 저장할 boardList객체생성
 		try {
 			conn = JDBCUtil.getConnection();
-			stmt = conn.prepareStatement(BOARD_LIST);
+			if(vo.getSearchCondition().equals("TITLE")) {
+				stmt = conn.prepareStatement(BOARD_LIST_T);
+			} else if (vo.getSearchCondition().equals("CONTENT")) {
+				stmt = conn.prepareStatement(BOARD_LIST_C);
+			}
+			stmt.setString(1, vo.getSearchKeyword());
 			rs = stmt.executeQuery();
 			while(rs.next()) {
 				BoardVO board = new BoardVO();
